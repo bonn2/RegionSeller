@@ -1,0 +1,9 @@
+name: RegionSeller
+version: '${version}'
+main: bonn2.regionseller.RegionSeller
+api-version: 1.18
+authors: [ bonn2 ]
+description: Allow the selling of worldguard regions for items.
+depend:
+  - WorldGuard
+  - WorldEdit
