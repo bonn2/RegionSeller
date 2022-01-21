@@ -1,15 +1,18 @@
 package bonn2.regionseller.listener;
 
+import bonn2.regionseller.util.DataUtil;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,22 +33,32 @@ public class SignListener implements Listener {
 
     /*
     Format
-    =========
+    ============
     §a[For Sale]
     5 Diamonds
     §3shop
     plot1
-    =========
+    ============
      */
 
     @EventHandler
     public void onSignClick(@NotNull PlayerInteractEvent event) {
-        // TODO: 1/21/2022 save a limit of types of plots a player can own
         if (event.getClickedBlock() == null) return;
         if (event.getClickedBlock().getState() instanceof Sign sign) {
             if (sign.line(0).equals(topLine)) {
                 Player player = event.getPlayer();
                 String[] lines = getSignLines(sign);
+                // Check if player already owns plot of this type
+                if (DataUtil.hasPlot(player.getUniqueId(), lines[2])) {
+                    player.sendMessage(Component
+                            .text(
+                                    "You already own a %s!"
+                                            .formatted(lines[2])
+                            )
+                            .color(TextColor.color(16733525)));
+                    return;
+                }
+                // Get price
                 Material currency = Material.getMaterial(lines[1].split(" ")[1].toUpperCase());
                 if (currency == null) return;
                 int price = Integer.parseInt(lines[1].split(" ")[0]);
@@ -85,6 +98,8 @@ public class SignListener implements Listener {
                 DefaultDomain members = region.getMembers();
                 members.addPlayer(player.getUniqueId());
                 region.setMembers(members);
+                // Add player ownership to file
+                DataUtil.addPlot(player.getUniqueId(), lines[2], lines[3], player.getWorld());
                 // Remove the sign
                 sign.getBlock().setType(Material.AIR);
 
@@ -94,7 +109,8 @@ public class SignListener implements Listener {
                                         .formatted(lines[3], price, currency.name().toLowerCase(Locale.ROOT))
                         )
                         .color(TextColor.color(43520)));
-                // TODO: 1/21/2022 Play sound and make particle 
+                player.playSound(player.getLocation(), Sound.ENTITY_ARROW_HIT_PLAYER, 1f, 1f);
+                player.spawnParticle(Particle.VILLAGER_HAPPY, sign.getLocation().add(0.5, 0.5, 0.5), 25, .75, .75, .75);
             }
         }
     }
@@ -142,13 +158,11 @@ public class SignListener implements Listener {
                 }
                 event.line(0, topLine);
                 event.line(2, Component.text(lines[2]).color(TextColor.color(43690)));
-                //event.update();
             } else {
                 event.line(0, Component.empty());
                 event.line(1, Component.empty());
                 event.line(2, Component.empty());
                 event.line(3, Component.empty());
-                //event.update();
             }
         }
 

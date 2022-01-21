@@ -1,6 +1,7 @@
 package bonn2.regionseller;
 
 import bonn2.regionseller.listener.SignListener;
+import bonn2.regionseller.util.DataUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.logging.Logger;
@@ -14,6 +15,7 @@ public final class RegionSeller extends JavaPlugin {
     public void onEnable() {
         plugin = this;
         logger = plugin.getLogger();
+        DataUtil.load();
         getServer().getPluginManager().registerEvents(new SignListener(), this);
     }
 
