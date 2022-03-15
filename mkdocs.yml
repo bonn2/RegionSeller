@@ -1,0 +1,11 @@
+site_name: RegionSeller Docs
+theme:
+  name: material
+repo_url: https://github.com/bonn2/RegionSeller
+repo_name: bonn2/RegionSeller
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/bonn2/RegionSeller
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/Swkqv3Tp4R
